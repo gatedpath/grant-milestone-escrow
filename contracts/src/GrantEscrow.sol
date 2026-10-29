@@ -71,6 +71,8 @@ contract GrantEscrow is AccessControl, Gated {
     uint256 public grantCount;
 
     mapping(uint256 grantId => Grant) private _grants;
+    // A mapping to a dynamic array has no initialiser to write; Slither flags every such mapping.
+    // slither-disable-next-line uninitialized-state
     mapping(uint256 grantId => Milestone[]) private _milestones;
 
     /// @notice A funder deposited `amount` of `token` for `grantee`, split into `milestones` tranches.
@@ -138,7 +140,7 @@ contract GrantEscrow is AccessControl, Gated {
         g.token = token;
         g.deposited = amount;
 
-        uint256 sum;
+        uint256 sum = 0;
         Milestone[] storage ms = _milestones[grantId];
         for (uint256 i = 0; i < tranches.length; ++i) {
             if (tranches[i] == 0) revert ZeroTranche(i);

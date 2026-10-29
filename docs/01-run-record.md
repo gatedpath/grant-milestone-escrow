@@ -33,6 +33,24 @@ job, with a second run passing. Files added beside this record: `deployment-153-
 
 The verdict of 17 October stands below as written then.
 
+## Addendum, 29 October 2026: the two analyser lines fixed, and what CI found about the kit
+
+The public repository's first CI run (`gatedpath/grant-milestone-escrow`, commit 883c69c) failed its Slither job at
+`fail-on: medium`: `uninitialized-state` (High) on the `_milestones` mapping and `uninitialized-local` (Medium) on `sum` in
+`fund`, the two lines finding 9 left for me. Fixed in the scaffold the same day: `uint256 sum = 0;`, and a
+`slither-disable-next-line uninitialized-state` with its reason directly above the mapping (a mapping to a dynamic array
+has nothing to initialise; Slither flags every such mapping). Proof: `forge fmt --check` clean, 89 tests, Slither exit 0
+with the three Low `timestamp` notes every scaffold carries, and the deployed bytecode with its metadata stripped hashes
+the same before and after (84e4edf5bdf0634d), so the contract on 153 at 0x57B3…D395 is byte for byte what this source
+compiles to; only the metadata hash differs, so a re-verification on Routescan from the new source would need the
+original. The source in this repository is the fixed one.
+
+**What this showed about the kit, for 0.2.4.** The ship report of 25 October says `slither-report: pass`, and it was
+telling the truth about what it checked: `checkSlitherReport` in `@gatedpath/preflight` confirms the report is fresh (its
+source hash matches the sources) and never reads the findings. A fresh report with a High in it passed. That is the
+shape the 19 September audit named, a guard that checks something near the thing. 0.2.4's preflight reads the report's
+findings and fails at or above the project's `fail_on` (`slither.config.json`, default medium), the same rule CI applies.
+
 ## Verdict, 17 October 2026
 
 Proven on a fork of testnet, and not further. One new contract, `GrantEscrow`, compiles under the
